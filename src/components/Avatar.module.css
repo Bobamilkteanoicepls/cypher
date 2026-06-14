@@ -1,0 +1,38 @@
+.placeholder {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 25%, #ffffff22 0%, transparent 50%);
+}
+
+.initials {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #ffffff;
+  text-shadow: 0 2px 12px #00000066;
+  z-index: 1;
+}
+
+.styleTag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffffffcc;
+  background: #00000033;
+  padding: 2px 8px;
+  border-radius: 4px;
+  z-index: 1;
+}
