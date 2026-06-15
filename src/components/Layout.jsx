@@ -1,15 +1,25 @@
+import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Compass, Newspaper, User, Calendar } from 'lucide-react'
+import { Compass, Newspaper, User, Calendar, PanelLeftClose, PanelLeft } from 'lucide-react'
 import { useUser } from '../data/userStore'
 import styles from './Layout.module.css'
 
 export default function Layout() {
   const { profile } = useUser()
   const navigate = useNavigate()
+  const [collapsed, setCollapsed] = useState(false)
 
   return (
     <div className={styles.shell}>
-      <nav className={styles.sidebar}>
+      {collapsed && (
+        <button className={styles.expandBtn} onClick={() => setCollapsed(false)} aria-label="Expand sidebar">
+          <PanelLeft size={18} />
+        </button>
+      )}
+      <nav className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
+        <button className={styles.collapseBtn} onClick={() => setCollapsed(true)} aria-label="Collapse sidebar">
+          <PanelLeftClose size={16} />
+        </button>
         <div className={styles.logo} onClick={() => navigate('/discover')}>
           <span className={styles.logoText}>CYPHER</span>
         </div>
@@ -49,7 +59,7 @@ export default function Layout() {
         </div>
       </nav>
 
-      <main className={styles.main}>
+      <main className={`${styles.main} ${collapsed ? 'sidebar-collapsed' : ''}`}>
         <Outlet />
       </main>
     </div>

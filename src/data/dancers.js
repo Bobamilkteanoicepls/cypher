@@ -26,6 +26,7 @@ export const dancers = [
     mentor: null,
     crew: 'Rushball',
     photo: 'https://upload.wikimedia.org/wikipedia/commons/1/10/Kyoka_Yamamoto_in_December_2025.png',
+    cutout: '/dancers/kyoka.png',
     achievements: [
       { title: 'Red Bull Dance Your Style World Final Winner', year: 2022 },
       { title: 'Juste Debout Hip-Hop World Winner (w/ Maika, as Rushball)', year: 2016 },
@@ -51,6 +52,7 @@ export const dancers = [
     mentor: null,
     crew: null,
     photo: 'https://upload.wikimedia.org/wikipedia/commons/3/36/Les_Twins_at_SF_Workshop_April_2019.jpg',
+    cutout: '/dancers/les-twins.png',
     achievements: [
       { title: 'World of Dance (NBC) Champions', year: 2017 },
       { title: 'Juste Debout Hip-Hop New Style Winners', year: 2011 },
@@ -132,6 +134,7 @@ export const dancers = [
     mentor: null,
     crew: 'Rock Steady Crew · Electric Boogaloos',
     photo: 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Mr_Wiggles.jpg',
+    cutout: '/dancers/mr-wiggles.png',
     achievements: [
       { title: 'Featured in "Wild Style"', year: 1983 },
       { title: 'Featured in "Beat Street"', year: 1984 },
@@ -294,6 +297,7 @@ export const dancers = [
     mentor: null,
     crew: null,
     photo: 'https://upload.wikimedia.org/wikipedia/commons/b/b8/2025-12-31_Phil_Wizard_for_Marie_Claire_Korea_02_%28cropped%29.jpg',
+    cutout: '/dancers/phil-wizard.png',
     achievements: [
       { title: 'Olympic Breaking Gold, Paris (first-ever)', year: 2024 },
       { title: 'Pan American Games Gold, Santiago', year: 2023 },
@@ -320,6 +324,7 @@ export const dancers = [
     mentor: null,
     crew: 'K.A.K.B',
     photo: 'https://upload.wikimedia.org/wikipedia/commons/7/7f/%E5%8D%8A%E4%BA%95%E9%87%8D%E5%B9%B8.jpg',
+    cutout: '/dancers/shigekix.png',
     achievements: [
       { title: 'Red Bull BC One World Champion (youngest ever)', year: 2020 },
       { title: 'Youth Olympic Games Bronze, Buenos Aires', year: 2018 },
