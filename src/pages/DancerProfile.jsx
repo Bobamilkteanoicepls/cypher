@@ -1,30 +1,64 @@
+import { useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Heart, Share2, Play, Trophy, Star } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ArrowLeft, Play, Trophy, Medal, Award, Star, Crown } from 'lucide-react'
 import { getDancerById } from '../data/dancers'
-import { useUser } from '../data/userStore'
 import Avatar from '../components/Avatar'
 import styles from './DancerProfile.module.css'
 
 const STYLE_COLORS = {
-  'Hip Hop': '#6366f1',
-  'Waacking': '#a855f7',
-  'Locking': '#f59e0b',
-  'Popping': '#10b981',
-  'House': '#06b6d4',
-  'Breaking': '#ef4444',
-  'Krump': '#f97316',
-  'Voguing': '#ec4899',
-  'Freestyle': '#8b5cf6',
-  'Heels': '#e879f9',
+  'Hip Hop': '#7C4DFF', 'Waacking': '#a855f7', 'Locking': '#f59e0b',
+  'Popping': '#10b981', 'House': '#06b6d4', 'Breaking': '#ef4444',
+  'Krump': '#f97316', 'Voguing': '#ec4899', 'Freestyle': '#8b5cf6', 'Heels': '#e879f9',
 }
 
-const ACHIEVEMENT_ICONS = ['🏆', '🥈', '🎖', '⭐', '🏅']
+const HONOR_ICONS = [Crown, Trophy, Medal, Award, Star]
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.35 } },
+}
+const item = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
+}
+
+function Particles({ count = 22 }) {
+  const bits = useMemo(() => Array.from({ length: count }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    size: 1 + Math.random() * 3,
+    delay: -Math.random() * 14,
+    duration: 9 + Math.random() * 12,
+    drift: (Math.random() - 0.5) * 60,
+    opacity: 0.15 + Math.random() * 0.5,
+  })), [count])
+  return (
+    <div className={styles.particles} aria-hidden>
+      {bits.map(b => (
+        <span
+          key={b.id}
+          className={styles.particle}
+          style={{
+            left: `${b.left}%`,
+            width: b.size,
+            height: b.size,
+            '--drift': `${b.drift}px`,
+            '--dur': `${b.duration}s`,
+            '--op': b.opacity,
+            animationDelay: `${b.delay}s`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
 
 export default function DancerProfile() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { isFavorite, toggleFavorite } = useUser()
   const dancer = getDancerById(id)
+  const [cutoutFailed, setCutoutFailed] = useState(false)
 
   if (!dancer) return (
     <div className={styles.notFound}>
@@ -33,154 +67,162 @@ export default function DancerProfile() {
     </div>
   )
 
-  const fav = isFavorite(dancer.id)
+  const realName = dancer.realName.replace(/\s*\(.*\)\s*/, '')
+  const kanji = (dancer.realName.match(/\(([^)]+)\)/) || [])[1]
+  const useCutout = dancer.cutout && !cutoutFailed
+  const displayName = (dancer.realName.match(/\(/) ? realName : dancer.name).toUpperCase()
 
   return (
     <div className={styles.page}>
-      {/* Background hero */}
-      <div className={styles.heroBg}>
-        <Avatar dancer={dancer} className={styles.heroBgImg} objectPosition="center 20%" />
-        <div className={styles.heroBgOverlay} />
+      {/* Camera is locked. Layer 1 — Battle arena (static), Layer 2 — Audience crowd (idle shimmer) */}
+      <div className={styles.bg}>
+        <div
+          className={styles.bgImg}
+          style={{ backgroundImage: 'url(/stage/arena.jpg)' }}
+        />
+        <div
+          className={styles.crowd}
+          style={{ backgroundImage: 'url(/stage/arena.jpg)' }}
+        />
+        <div className={styles.bgHaze} />
+        {/* Layer 3 — Stage smoke */}
+        <div className={styles.fog}>
+          <div className={`${styles.fogBank} ${styles.fogA}`} />
+          <div className={`${styles.fogBank} ${styles.fogB}`} />
+        </div>
+        {/* Moving spotlight */}
+        <div className={styles.spotlight} />
+        <div className={styles.bgVignette} />
       </div>
 
-      {/* Back button */}
-      <button className={styles.backBtn} onClick={() => navigate(-1)}>
-        <ArrowLeft size={14} />
-        BACK TO DANCERS
-      </button>
-
-      <div className={styles.layout}>
-        {/* Left panel */}
-        <div className={styles.leftPanel}>
-          <div className={styles.nameBlock}>
-            <h1 className={styles.name}>{dancer.name.toUpperCase()}</h1>
-            {dancer.realName !== dancer.name && (
-              <p className={styles.realName}>{dancer.realName}</p>
-            )}
-          </div>
-
-          <div className={styles.countryBadge}>
-            <span>{dancer.flag}</span>
-            <span>{dancer.country.toUpperCase()}</span>
-          </div>
-
-          <div className={styles.statsRow}>
-            <div className={styles.stat}>
-              <span className={styles.statLabel}>DANCE EXPERIENCE</span>
-              <span className={styles.statValue}>{dancer.experience}+ <span className={styles.statUnit}>YEARS</span></span>
-            </div>
-            {dancer.age && (
-              <div className={styles.stat}>
-                <span className={styles.statLabel}>AGE</span>
-                <span className={styles.statValue}>{dancer.age} <span className={styles.statUnit}>YEARS OLD</span></span>
-              </div>
-            )}
-            {dancer.born && (
-              <div className={styles.stat}>
-                <span className={styles.statLabel}>BORN</span>
-                <span className={styles.statValue} style={{ fontSize: 15 }}>{dancer.born}</span>
-              </div>
-            )}
-          </div>
-
-          {dancer.bio && (
-            <p className={styles.bio}>{dancer.bio}</p>
-          )}
-
-          {/* Specialties */}
-          <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>SPECIALTIES</h3>
-            <div className={styles.tagRow}>
-              {dancer.styles.map(s => (
-                <span
-                  key={s}
-                  className={styles.tag}
-                  style={s === dancer.primaryStyle ? { background: STYLE_COLORS[s] || '#7c3aed', borderColor: 'transparent' } : {}}
-                >{s.toUpperCase()}</span>
-              ))}
-            </div>
-          </div>
-
-          {/* Achievements */}
-          <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>HONORS & ACHIEVEMENTS</h3>
-            <div className={styles.achieveList}>
-              {dancer.achievements.map((a, i) => (
-                <div key={i} className={styles.achieve}>
-                  <span className={styles.achieveIcon}>{ACHIEVEMENT_ICONS[i % ACHIEVEMENT_ICONS.length]}</span>
-                  <span className={styles.achieveTitle}>{a.title}</span>
-                  <span className={styles.achieveYear}>{a.year}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Mentor */}
-          {dancer.mentor && (
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>MENTOR</h3>
-              <div className={styles.mentorCard}>
-                <div>
-                  <div className={styles.mentorName}>{dancer.mentor}</div>
-                  {dancer.crew && <div className={styles.mentorCrew}>{dancer.crew.toUpperCase()}</div>}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {dancer.crew && !dancer.mentor && (
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>CREW</h3>
-              <div className={styles.mentorCard}>
-                <div className={styles.mentorName}>{dancer.crew}</div>
-              </div>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className={styles.actionRow}>
-            <button
-              className={`${styles.actionBtn} ${fav ? styles.actionBtnActive : ''}`}
-              onClick={() => toggleFavorite(dancer.id, dancer.name)}
-            >
-              <Heart size={16} fill={fav ? 'currentColor' : 'none'} />
-              {fav ? 'FAVORITED' : 'FAVORITE'}
-            </button>
-            <button className={styles.actionBtn}>
-              <Share2 size={16} />
-              SHARE
-            </button>
+      {/* Layer 4 — Dancer cutout (locked position, idle breathing only — no zoom/pan) */}
+      <motion.div
+        className={`${styles.figure} ${useCutout ? styles.figureCutout : ''}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+      >
+        <div className={styles.figureTilt}>
+          <div className={styles.figureBreath}>
+            {useCutout
+              ? <img src={dancer.cutout} alt={dancer.name} className={styles.figureImg} onError={() => setCutoutFailed(true)} />
+              : <Avatar dancer={dancer} className={styles.figureImg} objectPosition="center top" />}
+            <div className={styles.figureGlow} />
           </div>
         </div>
+      </motion.div>
 
-        {/* Right panel — classic videos */}
-        {dancer.videos?.length > 0 && (
-          <div className={styles.videosPanel}>
-            <h3 className={styles.videosPanelTitle}>CLASSIC VIDEOS</h3>
-            <div className={styles.videosGrid}>
-              {dancer.videos.map((v, i) => (
-                <a
-                  key={i}
-                  href={v.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={styles.videoCard}
-                >
-                  <div className={styles.videoThumb}>
-                    <div className={styles.videoPlay}><Play size={22} fill="currentColor" /></div>
-                    {v.year && <span className={styles.videoYear}>{v.year}</span>}
-                  </div>
-                  <div className={styles.videoMeta}>
-                    <span className={styles.videoTitle}>{v.title}</span>
-                    {v.duration && v.duration !== '—' && <span className={styles.videoDur}>{v.duration}</span>}
-                  </div>
-                  <div className={styles.videoUrl}>Search on YouTube →</div>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
+      {/* Layer 5 — Particles */}
+      <Particles />
+
+      {/* Layer 6 — HUD UI */}
+      <div className={styles.hud} aria-hidden>
+        <span className={`${styles.bracket} ${styles.brTL}`} />
+        <span className={`${styles.bracket} ${styles.brTR}`} />
+        <span className={`${styles.bracket} ${styles.brBL}`} />
+        <span className={`${styles.bracket} ${styles.brBR}`} />
+        <div className={styles.scanlines} />
       </div>
+
+      <button className={styles.backBtn} onClick={() => navigate(-1)}>
+        <ArrowLeft size={16} /> BACK TO ROSTER
+      </button>
+
+      {/* Left info column */}
+      <motion.div className={styles.panel} variants={container} initial="hidden" animate="show">
+        <motion.div className={styles.nameBlock} variants={item}>
+          <div className={styles.eyebrow}>CYPHER · DANCER DOSSIER</div>
+          <h1 className={styles.name} data-text={displayName}>{displayName}</h1>
+          {kanji && <div className={styles.kanji}>{kanji}</div>}
+          <div className={styles.flagBadge}>
+            <span className={styles.flag}>{dancer.flag}</span>
+            <span>{dancer.country.toUpperCase()}</span>
+          </div>
+        </motion.div>
+
+        <motion.div className={styles.statGrid} variants={item}>
+          <div className={styles.statCard}>
+            <span className={styles.statLabel}>DANCE EXPERIENCE</span>
+            <span className={styles.statValue}>{dancer.experience}+<span className={styles.statUnit}>YRS</span></span>
+          </div>
+          {dancer.age && (
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>AGE</span>
+              <span className={styles.statValue}>{dancer.age}</span>
+            </div>
+          )}
+        </motion.div>
+
+        <motion.section className={styles.section} variants={item}>
+          <h3 className={styles.sectionTitle}>DANCE STYLES</h3>
+          <div className={styles.tagRow}>
+            {dancer.styles.map(s => {
+              const primary = s === dancer.primaryStyle
+              return (
+                <span
+                  key={s}
+                  className={`${styles.tag} ${primary ? styles.tagActive : ''}`}
+                  style={primary ? { '--glow': STYLE_COLORS[s] || '#7C4DFF' } : {}}
+                >{s.toUpperCase()}</span>
+              )
+            })}
+          </div>
+        </motion.section>
+
+        <motion.section className={styles.section} variants={item}>
+          <h3 className={styles.sectionTitle}>HONORS &amp; ACHIEVEMENTS</h3>
+          <div className={styles.timeline}>
+            {dancer.achievements.map((a, i) => {
+              const Icon = HONOR_ICONS[i % HONOR_ICONS.length]
+              return (
+                <div key={i} className={styles.honor}>
+                  <span className={styles.honorNode}><Icon size={14} /></span>
+                  <span className={styles.honorTitle}>{a.title}</span>
+                  <span className={styles.honorYear}>{a.year}</span>
+                </div>
+              )
+            })}
+          </div>
+        </motion.section>
+
+        {(dancer.mentor || dancer.crew) && (
+          <motion.section className={styles.section} variants={item}>
+            <h3 className={styles.sectionTitle}>{dancer.mentor ? 'MENTOR' : 'CREW'}</h3>
+            <div className={styles.mentorCard}>
+              <div className={styles.mentorGlyph}>{(dancer.mentor || dancer.crew).charAt(0)}</div>
+              <div>
+                <div className={styles.mentorName}>{dancer.mentor || dancer.crew}</div>
+                {dancer.mentor && dancer.crew && <div className={styles.mentorSub}>{dancer.crew.toUpperCase()}</div>}
+                {!dancer.mentor && <div className={styles.mentorSub}>{dancer.country.toUpperCase()} · {dancer.primaryStyle.toUpperCase()}</div>}
+              </div>
+            </div>
+          </motion.section>
+        )}
+      </motion.div>
+
+      {/* Classic videos carousel */}
+      {dancer.videos?.length > 0 && (
+        <motion.div
+          className={styles.videos}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.7 }}
+        >
+          <h3 className={styles.sectionTitle}>CLASSIC VIDEOS</h3>
+          <div className={styles.videoTrack}>
+            {dancer.videos.map((v, i) => (
+              <a key={i} href={v.url} target="_blank" rel="noreferrer" className={styles.videoCard}>
+                <div className={styles.videoThumb}>
+                  <div className={styles.videoPlay}><Play size={18} fill="currentColor" /></div>
+                  {v.year && <span className={styles.videoYear}>{v.year}</span>}
+                </div>
+                <div className={styles.videoTitle}>{v.title}</div>
+                <div className={styles.videoLink}>Watch on YouTube →</div>
+              </a>
+            ))}
+          </div>
+        </motion.div>
+      )}
     </div>
   )
 }
